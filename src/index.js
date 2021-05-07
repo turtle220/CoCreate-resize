@@ -43,18 +43,18 @@ CoCreateResize.prototype = {
     },
     initResize: function () {
         if (this.leftDrag) {
-            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 0), 0);
-            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 0), 0);
+            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkDragCorner(e, 0), 0);
+            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkDragCorner(e, 3), 0);
         }
         if (this.topDrag) {
-            this.add_removeListenerMulti(this.topDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 1), 0);
+            this.add_removeListenerMulti(this.topDrag, "mousemove touchmove", this.checkDragCorner(e, 1), 0);
         }
         if (this.rightDrag) {
-            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 2), 0);
-            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 1), 0);
+            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkDragCorner(e, 2), 0);
+            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkDragCorner(e, 4), 0);
         }
         if (this.bottomDrag) {
-            this.add_removeListenerMulti(this.bottomDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 2), 0);
+            this.add_removeListenerMulti(this.bottomDrag, "mousemove touchmove", this.checkDragCorner(e, 5), 0);
         }
     },
     initDrag: function (e) {
@@ -120,7 +120,7 @@ CoCreateResize.prototype = {
         this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
         this.add_removeListenerMulti(this.rightDrag, "mousedown touchstart", this.initBottomRightDrag, 0);
     },
-    checkTopDragTopCorner: function (e, type) {
+    checkDragCorner: function (e, type) {
         let offsetX, offsetY,
         scrollLeft = document.documentElement.scrollLeft;
         scrollTop = document.documentElement.scrollTop;
@@ -151,20 +151,11 @@ CoCreateResize.prototype = {
                 this.add_removeListenerMulti(this.rightDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
             } else this.rightDrag.style.cursor = "e-resize";
         }
-        
-    },
-    checkBottomDragBottomCorner: function (e, type) {
-        let offsetX, offsetY,
-            scrollLeft = document.documentElement.scrollLeft;
-            scrollTop = document.documentElement.scrollTop;
-        if (e.touches) e = e.touches[0];
-        offsetX = e.clientX - this.getTopLeftDistance(this.bottomDrag, 1) + scrollLeft;
-        this.initStopDrag();
-        if (type === '0' && offsetX < this.cornerSize && this.leftDrag) {
+        if (type === '3' && offsetX < this.cornerSize && this.leftDrag) {
             this.bottomDrag.style.cursor = "ne-resize";
             this.add_removeListenerMulti(this.bottomDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
         } else this.bottomDrag.style.cursor = "s-resize";
-        if (type === '1' && this.bottomDrag) {
+        if (type === '4' && this.bottomDrag) {
             offsetY = this.getTopLeftDistance(this.bottomDrag, 0) - e.clientY - scrollTop;
             if (offsetY < this.cornerSize) {
                 this.leftDrag.style.cursor = "ne-resize";
@@ -173,7 +164,7 @@ CoCreateResize.prototype = {
                 this.leftDrag.style.cursor = "e-resize";
             }
         }
-        if (type === '2' && this.rightDrag) {
+        if (type === '5' && this.rightDrag) {
             offsetX = this.getTopLeftDistance(this.rightDrag, 1) - e.clientX - scrollLeft;
             if (offsetX < this.cornerSize) {
                 this.bottomDrag.style.cursor = "se-resize";
@@ -183,6 +174,7 @@ CoCreateResize.prototype = {
             }
         }
     },
+
     bindListeners: function () {
         this.initTopLeftDrag = this.initTopLeftDrag.bind(this);
         this.doTopLeftDrag = this.doTopLeftDrag.bind(this);
@@ -191,7 +183,7 @@ CoCreateResize.prototype = {
         this.stopDrag = this.stopDrag.bind(this);
         this.initDrag = this.initDrag.bind(this);
         this.initStopDrag = this.initStopDrag.bind(this);
-        this.checkTopDragTopCorner = this.checkTopDragTopCorner.bind(this);
+        this.checkDragCorner = this.checkDragCorner.bind(this);
         this.checkBottomDragBottomCorner = this.checkBottomDragBottomCorner.bind(this);
     },
     // Get an element's distance from the top of the page, type: 0 - top, 1 - left
@@ -212,7 +204,6 @@ CoCreateResize.prototype = {
             type === '0' ? element.addEventListener(events[i], listener, false) : element.removeEventListener(events[i], listener, false);
         }
     },
-
     // style="pointer-events:none" for iframe when drag event starts
     processIframe: function () {
         this.resizeWidget.querySelectorAll("iframe").forEach(function (item) {
