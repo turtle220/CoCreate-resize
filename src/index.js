@@ -43,18 +43,18 @@ CoCreateResize.prototype = {
     },
     initResize: function () {
         if (this.leftDrag) {
-            this.addListenerMulti(this.leftDrag, "mousemove touchmove", this.checkTopDragTopCorner);
-            this.addListenerMulti(this.leftDrag, "mousemove touchmove", this.checkBottomDragBottomCorner);
+            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 0), 0);
+            this.add_removeListenerMulti(this.leftDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 0), 0);
         }
         if (this.topDrag) {
-            this.addListenerMulti(this.topDrag, "mousemove touchmove", this.checkTopDragTopCorner);
+            this.add_removeListenerMulti(this.topDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 1), 0);
         }
         if (this.rightDrag) {
-            this.addListenerMulti(this.rightDrag, "mousemove touchmove", this.checkTopDragTopCorner);
-            this.addListenerMulti(this.rightDrag, "mousemove touchmove", this.checkBottomDragBottomCorner);
+            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkTopDragTopCorner(e, 2), 0);
+            this.add_removeListenerMulti(this.rightDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 1), 0);
         }
         if (this.bottomDrag) {
-            this.addListenerMulti(this.bottomDrag, "mousemove touchmove", this.checkBottomDragBottomCorner);
+            this.add_removeListenerMulti(this.bottomDrag, "mousemove touchmove", this.checkBottomDragBottomCorner(e, 2), 0);
         }
     },
     initDrag: function (e) {
@@ -69,11 +69,11 @@ CoCreateResize.prototype = {
             this.startY = e.clientY;
             this.startX = e.clientX;
         }
-        this.addListenerMulti(document.documentElement, "mouseup touchend", this.stopDrag);
+        this.add_removeListenerMulti(document.documentElement, "mouseup touchend", this.stopDrag, 0);
     },
     initTopLeftDrag: function (e) {
         this.initDrag(e);
-        this.addListenerMulti(document.documentElement, "mousemove touchmove", this.doTopLeftDrag);
+        this.add_removeListenerMulti(document.documentElement, "mousemove touchmove", this.doTopLeftDrag, 0);
     },
     doTopLeftDrag: function (e) {
         let top, height, left, width;
@@ -91,7 +91,7 @@ CoCreateResize.prototype = {
     },
     initBottomRightDrag: function (e) {
         this.initDrag(e);
-        this.addListenerMulti(document.documentElement, "mousemove touchmove", this.doBottomRightDrag);
+        this.add_removeListenerMulti(document.documentElement, "mousemove touchmove", this.doBottomRightDrag, 0);
     },
     doBottomRightDrag: function (e) {
         let height = width = 0;
@@ -110,72 +110,74 @@ CoCreateResize.prototype = {
         this.resizeWidget.querySelectorAll("iframe").forEach(function (item) {
             item.style.pointerEvents = null;
         });
-        this.removeListenerMulti(document.documentElement, "mousemove touchmove", this.doTopLeftDrag);
-        this.removeListenerMulti(document.documentElement, "mousemove touchmove", this.doBottomRightDrag);
-        this.removeListenerMulti(document.documentElement, "mouseup touchend", this.stopDrag);
+        this.add_removeListenerMulti(document.documentElement, "mousemove touchmove", this.doTopLeftDrag, 1);
+        this.add_removeListenerMulti(document.documentElement, "mousemove touchmove", this.doBottomRightDrag, 1);
+        this.add_removeListenerMulti(document.documentElement, "mouseup touchend", this.stopDrag, 1);
     },
     initStopDrag: function () {
-        this.removeListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag);
-        this.removeListenerMulti(this.topDrag, "mousedown touchstart", this.initBottomRightDrag);
-        this.addListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag);
-        this.addListenerMulti(this.rightDrag, "mousedown touchstart", this.initBottomRightDrag);
+        this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag, 1);
+        this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initBottomRightDrag, 1);
+        this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
+        this.add_removeListenerMulti(this.rightDrag, "mousedown touchstart", this.initBottomRightDrag, 0);
     },
-    checkTopDragTopCorner: function (e) {
+    checkTopDragTopCorner: function (e, type) {
         let offsetX, offsetY,
-            scrollLeft = document.documentElement.scrollLeft;
-            scrollTop = document.documentElement.scrollTop;
+        scrollLeft = document.documentElement.scrollLeft;
+        scrollTop = document.documentElement.scrollTop;
         if (e.touches) e = e.touches[0];
         offsetX = e.clientX - this.getTopLeftDistance(this.topDrag, 1) + scrollLeft;
         offsetY = e.clientY - this.getTopLeftDistance(this.leftDrag, 0) + scrollTop;
 
         this.initStopDrag();
-        if (offsetX < this.cornerSize && this.leftDrag) {
-            this.topDrag.style.cursor = "se-resize";
-            this.addListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag);
-        } else this.topDrag.style.cursor = "s-resize";
 
-        if (this.rightDrag) {
+        if ( type === '0' && offsetX < this.cornerSize && this.leftDrag) {
+            this.topDrag.style.cursor = "se-resize";
+            this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
+        } else this.topDrag.style.cursor = "s-resize";
+    
+        if ( type === '1' && this.rightDrag) {
             offsetX = this.getTopLeftDistance(this.rightDrag, 1) - e.clientX - scrollLeft;
             if (offsetX < this.cornerSize) {
                 this.topDrag.style.cursor = "ne-resize";
-                this.addListenerMulti(this.topDrag, "mousedown touchstart", this.initBottomRightDrag);
+                this.add_removeListenerMulti(this.topDrag, "mousedown touchstart", this.initBottomRightDrag, 0);
             } else if (!this.leftDrag) {
                 this.topDrag.style.cursor = "s-resize";
             }
         }
-        if (this.topDrag) {
+        if ( type === '2' && this.topDrag) {
             offsetY = e.clientY - this.getTopLeftDistance(this.topDrag, 0) + scrollTop;
             if (offsetY < this.cornerSize) {
                 this.rightDrag.style.cursor = "ne-resize";
-                this.addListenerMulti(this.rightDrag, "mousedown touchstart", this.initTopLeftDrag);
+                this.add_removeListenerMulti(this.rightDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
             } else this.rightDrag.style.cursor = "e-resize";
         }
+        
     },
-    checkBottomDragBottomCorner: function (e) {
+    checkBottomDragBottomCorner: function (e, type) {
         let offsetX, offsetY,
             scrollLeft = document.documentElement.scrollLeft;
             scrollTop = document.documentElement.scrollTop;
         if (e.touches) e = e.touches[0];
         offsetX = e.clientX - this.getTopLeftDistance(this.bottomDrag, 1) + scrollLeft;
         this.initStopDrag();
-        if (offsetX < this.cornerSize && this.leftDrag) {
+        if (type === '0' && offsetX < this.cornerSize && this.leftDrag) {
             this.bottomDrag.style.cursor = "ne-resize";
-            this.addListenerMulti(this.bottomDrag, "mousedown touchstart", this.initTopLeftDrag);
+            this.add_removeListenerMulti(this.bottomDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
         } else this.bottomDrag.style.cursor = "s-resize";
-        if (this.bottomDrag) {
+        if (type === '1' && this.bottomDrag) {
             offsetY = this.getTopLeftDistance(this.bottomDrag, 0) - e.clientY - scrollTop;
             if (offsetY < this.cornerSize) {
                 this.leftDrag.style.cursor = "ne-resize";
-                this.addListenerMulti(this.leftDrag, "mousedown touchstart", this.initBottomRightDrag);
+                this.add_removeListenerMulti(this.leftDrag, "mousedown touchstart", this.initBottomRightDrag, 0);
             } else if (!this.topDrag) {
                 this.leftDrag.style.cursor = "e-resize";
             }
         }
-        if (this.rightDrag) {
+        if (type === '2' && this.rightDrag) {
             offsetX = this.getTopLeftDistance(this.rightDrag, 1) - e.clientX - scrollLeft;
             if (offsetX < this.cornerSize) {
                 this.bottomDrag.style.cursor = "se-resize";
-                this.addListenerMulti(this.bottomDrag, "mousedown touchstart", this.initBottomRightDrag);
+                this.add_removeListenerMulti(this.bottomDrag, "mousedown touchstart", this.initBottomRightDrag, 0);
             } else if (!this.leftDrag) {
                 this.bottomDrag.style.cursor = "s-resize";
             }
@@ -204,19 +206,13 @@ CoCreateResize.prototype = {
         return location >= 0 ? location : 0;
     },
     // Bind multiiple events to a listener
-    addListenerMulti: function (element, eventNames, listener) {
+    add_removeListenerMulti: function (element, eventNames, listener, type) {
         let events = eventNames.split(" ");
         for (let i = 0, iLen = events.length; i < iLen; i++) {
-            element.addEventListener(events[i], listener, false);
+            type === '0' ? element.addEventListener(events[i], listener, false) : element.removeEventListener(events[i], listener, false);
         }
     },
-    // Remove multiiple events from a listener
-    removeListenerMulti: function (element, eventNames, listener) {
-        let events = eventNames.split(" ");
-        for (let i = 0, iLen = events.length; i < iLen; i++) {
-            element.removeEventListener(events[i], listener, false);
-        }
-    },
+
     // style="pointer-events:none" for iframe when drag event starts
     processIframe: function () {
         this.resizeWidget.querySelectorAll("iframe").forEach(function (item) {
