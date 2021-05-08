@@ -41,20 +41,20 @@ CoCreateResize.prototype = {
             this.initResize();
         }
     },
-    initResize: function () {
+    initResize: function (e) {
         if (this.leftDrag) {
-            this.add_removeListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner(e, 'TopLeft'), 0);
-            this.add_removeListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner(e, 'BottomLeft'), 0);
+            this.add_removeListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner('TopLeft'), 0);
+            this.add_removeListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner('BottomLeft'), 0);
         }
         if (this.topDrag) {
-            this.add_removeListener(this.topDrag, "mousemove touchmove", this.checkDragCorner(e, 'TopRight'), 0);
+            this.add_removeListener(this.topDrag, "mousemove touchmove", this.checkDragCorner('TopRight'), 0);
         }
         if (this.rightDrag) {
-            this.add_removeListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner(e, 'Top'), 0);
-            this.add_removeListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner(e, 'Bottom'), 0);
+            this.add_removeListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner( 'Top'), 0);
+            this.add_removeListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner( 'Bottom'), 0);
         }
         if (this.bottomDrag) {
-            this.add_removeListener(this.bottomDrag, "mousemove touchmove", this.checkDragCorner(e, 'BottomRight'), 0);
+            this.add_removeListener(this.bottomDrag, "mousemove touchmove", this.checkDragCorner( 'BottomRight'), 0);
         }
     },
     initDrag: function (e) {
@@ -118,13 +118,13 @@ CoCreateResize.prototype = {
     checkDragCorner: function (e, type) {
         let offsetX, offsetY,
         scrollLeft = document.documentElement.scrollLeft;
-        scrollTop = document.documentElement.scrollTop;
         if (e.touches) e = e.touches[0];
         offsetX = e.clientX - this.getTopLeftDistance(this.topDrag, 1) + scrollLeft;
-        offsetY = e.clientY - this.getTopLeftDistance(this.leftDrag, 0) + scrollTop;
-
+        if(type === 'Top' || type === 'Bottom') {
+            scrollTop = document.documentElement.scrollTop;
+            offsetY = e.clientY - this.getTopLeftDistance(this.leftDrag, 0) + scrollTop;
+        }
         this.initStopDrag();
-
         if ( type === 'TopLeft' && offsetX < this.cornerSize && this.leftDrag) {
             this.topDrag.style.cursor = "se-resize";
             this.add_removeListener(this.topDrag, "mousedown touchstart", this.initTopLeftDrag, 0);
