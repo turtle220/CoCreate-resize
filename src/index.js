@@ -44,20 +44,20 @@ CoCreateResize.prototype = {
     },
     initResize: function () {
         if (this.leftDrag) {
-            this.addremoveListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner(this, 'leftTop', this.leftDrag, this.initLeftDrag, this.initTopDrag), 'add');
-            this.addremoveListener(this.leftDrag, "mousemove touchmove", this.checkDragCorner(this, 'leftBottom', this.leftDrag, this.initLeftDrag, this.initBottomDrag), 'add');
+            this.addremoveListener(this.leftDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'leftTop', this.leftDrag, this.topDrag, this.initLeftDrag, this.initTopDrag)}, 'add');
+            this.addremoveListener(this.leftDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'leftBottom', this.leftDrag,this.bottomDrag, this.initLeftDrag, this.initBottomDrag)}, 'add');
         }
         if (this.topDrag) {
-            this.addremoveListener(this.topDrag, "mousemove touchmove", this.checkDragCorner(this, 'topLeft', this.topDrag, this.initTopDrag, this.initLeftDrag), 'add');
-            this.addremoveListener(this.topDrag, "mousemove touchmove", this.checkDragCorner(this, 'topRight', this.topDrag, this.initTopDrag, this.initRightDrag), 'add');
+            this.addremoveListener(this.topDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'topLeft', this.topDrag, this.leftDrag, this.initTopDrag, this.initLeftDrag)}, 'add');
+            this.addremoveListener(this.topDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'topRight', this.topDrag, this.rightDrag, this.initTopDrag, this.initRightDrag)}, 'add');
         }
         if (this.rightDrag) {
-            this.addremoveListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner(this, 'rightTop', this.rightDrag, this.initRightDrag, this.initTopDrag), 'add');
-            this.addremoveListener(this.rightDrag, "mousemove touchmove", this.checkDragCorner(this, 'rightBottom', this.rightDrag, this.initRightDrag, this.initBottomDrag), 'add');
+            this.addremoveListener(this.rightDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'rightTop', this.rightDrag, this.topDrag, this.initRightDrag, this.initTopDrag)}, 'add');
+            this.addremoveListener(this.rightDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'rightBottom', this.rightDrag, this.bottomDrag, this.initRightDrag, this.initBottomDrag)}, 'add');
         }
         if (this.bottomDrag) {
-            this.addremoveListener(this.bottomDrag, "mousemove touchmove", this.checkDragCorner(this, 'bottomLeft', this.bottomDrag, this.initBottomDrag, this.initLeftDrag), 'add');
-            this.addremoveListener(this.bottomDrag, "mousemove touchmove", this.checkDragCorner(this, 'bottomRight', this.bottomDrag, this.initBottomDrag, this.initRightDrag), 'add');
+            this.addremoveListener(this.bottomDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'bottomLeft', this.bottomDrag, this.leftDrag, this.initBottomDrag, this.initLeftDrag)}, 'add');
+            this.addremoveListener(this.bottomDrag, "mousemove touchmove", (e) => {this.checkDragCorner(e, 'bottomRight', this.bottomDrag, this.rightDrag, this.initBottomDrag, this.initRightDrag)}, 'add');
         }
     },
     initDrag: function () {
@@ -66,19 +66,19 @@ CoCreateResize.prototype = {
         this.startHeight = parseInt(document.defaultView.getComputedStyle(this.resizeWidget).height, 10);
         this.startLeft = parseInt(document.defaultView.getComputedStyle(this.resizeWidget).left, 10);
         this.startWidth = parseInt(document.defaultView.getComputedStyle(this.resizeWidget).width, 10);
+        this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'add');
+
     },
     initTopDrag: function (e) {
         this.initDrag();
         if (e.touches) this.startY = e.touches[0].clientY;
         else this.startY = e.clientY;
         this.addremoveListener(document.documentElement, "mousemove touchmove", this.doTopDrag, 'add');
-        this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'add');
     },
     doTopDrag: function (e) {
-        let top, height;
         if (e.touches) e = e.touches[0];
-        top = this.startTop + e.clientY - this.startY;
-        height = this.startHeight - e.clientY + this.startY;
+        let top = this.startTop + e.clientY - this.startY;
+        let height = this.startHeight - e.clientY + this.startY;
         if (top < 10 || height < 10) return;
         this.resizeWidget.style.top = top + "px";
         this.resizeWidget.style.height = height + "px";
@@ -88,7 +88,6 @@ CoCreateResize.prototype = {
         if (e.touches) this.startY = e.touches[0].clientY;
         else this.startY = e.clientY;
         this.addremoveListener(document.documentElement, "mousemove touchmove", this.doBottomDrag, 'add');
-        this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'add');
     },
     doBottomDrag: function (e) {
         let height = 0;
@@ -102,10 +101,10 @@ CoCreateResize.prototype = {
         if (e.touches) this.startX = e.touches[0].clientX;
         else this.startX = e.clientX;
         this.addremoveListener(document.documentElement, "mousemove touchmove", this.doLeftDrag, 'add');
-        this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'add');
     },
     doLeftDrag: function (e) {
         let left, width;
+        console.log('---left', e)
         if (e.touches) e = e.touches[0];
         left = this.startLeft + e.clientX - this.startX;
         width = this.startWidth - e.clientX + this.startX;
@@ -118,7 +117,6 @@ CoCreateResize.prototype = {
         if (e.touches) this.startX = e.touches[0].clientX;
         else this.startX = e.clientX;
         this.addremoveListener(document.documentElement, "mousemove touchmove", this.doRightDrag, 'add');
-        this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'add');
     },
     doRightDrag: function (e) {
         let width = 0;
@@ -127,6 +125,7 @@ CoCreateResize.prototype = {
         if (width < 10) return;
         this.resizeWidget.style.width = width + "px";
     },
+
     stopDrag: function (e) {
         this.resizeWidget.querySelectorAll("iframe").forEach(function (item) {
             item.style.pointerEvents = null;
@@ -138,7 +137,7 @@ CoCreateResize.prototype = {
         this.addremoveListener(document.documentElement, "mouseup touchend", this.stopDrag, 'remove');
     },
 
-    checkDragCorner: function (e, type, callFunc1, initDrag1, initDrag2) {
+    checkDragCorner: function (e, type, callFunc1, callFunc2, initDrag1, initDrag2) {
         let topLeftDrag = type === checkArr[0]
         let leftTopDrag = type === checkArr[1]
         let rightTopDrag = type === checkArr[2]
@@ -147,13 +146,7 @@ CoCreateResize.prototype = {
         let leftBotDrag = type === checkArr[5]
         let botRightDrag = type === checkArr[6]
         let rightBotDrag = type === checkArr[7]
-
         let offsetPos;
-        const styleFunc = topLeftDrag ? this.topDrag.style.cursor = "s-resize" : 
-                            leftTopDrag || (leftBotDrag && !this.topDrag)? this.leftDrag.style.cursor = "e-resize" : 
-                            topRightDrag ? this.topDrag.style.cursor = "s-resize" : 
-                            rightTopDrag || rightBotDrag ? this.rightDrag.style.cursor = "e-resize" :
-                            botLeftDrag || botRightDrag ? this.bottomDrag.style.cursor = "s-resize" : null;
 
         if (e.touches) e = e.touches[0];
         offsetPos = topLeftDrag ? e.clientX - this.getTopLeftDistance(this.topDrag, 1) + document.documentElement.scrollLeft : 
@@ -168,17 +161,13 @@ CoCreateResize.prototype = {
         this.addremoveListener(callFunc1, "mousedown touchstart", initDrag2, 'remove');
         this.addremoveListener(callFunc1, "mousedown touchstart", initDrag1, 'add');
 
-        if (offsetPos < this.cornerSize && (topLeftDrag || botLeftDrag) ? this.leftDrag : leftTopDrag ? this.topDrag : topRightDrag ? this.rightDrag : leftBotDrag || rightBotDrag ? this.bottomDrag : null) {
-            topLeftDrag ? this.topDrag.style.cursor = "se-resize" : 
-            leftTopDrag ? this.leftDrag.style.cursor = "se-resize" :
-            topRightDrag ? this.topDrag.style.cursor = "ne-resize" : 
-            rightTopDrag ? this.rightDrag.style.cursor = "ne-resize" : 
-            botLeftDrag ? this.bottomDrag.style.cursor = "ne-resize" : 
-            leftBotDrag ? this.leftDrag.style.cursor = "ne-resize" : 
-            botRightDrag ? this.bottomDrag.style.cursor = "se-resize" : 
-            rightBotDrag ? this.rightDrag.style.cursor = "se-resize" : "";
+        if (offsetPos < this.cornerSize && callFunc2) {
+            this.topDrag.style.cursor = topLeftDrag ? "se-resize" : topRightDrag ? "ne-resize" : "s-resize"
+            this.leftDrag.style.cursor = leftTopDrag ? "se-resize" : leftBotDrag ? "ne-resize" : "e-resize"
+            this.rightDrag.style.cursor = rightTopDrag ? "ne-resize" : rightBotDrag ? "se-resize" : "e-resize"
+            this.bottomDrag.style.cursor = botLeftDrag ? "ne-resize" : botRightDrag ? "se-resize" : "s-resize"
             this.addremoveListener(callFunc1, "mousedown touchstart", initDrag2, 'add');
-        } else styleFunc;
+        }
     },
 
     bindListeners: function () {
